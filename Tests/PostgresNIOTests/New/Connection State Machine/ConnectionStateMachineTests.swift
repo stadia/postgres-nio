@@ -6,6 +6,35 @@ import NIOSSL
 
 @Suite struct ConnectionStateMachineTests {
 
+    @Test func testAuthContextEquality() {
+        let context = AuthContext(username: "test", password: "secret", database: "news",
+                                  additionalParameters: [("application_name", "news"), ("search_path", "public")])
+        #expect(context == context)
+        #expect(AuthContext(username: "test") == AuthContext(username: "test"))
+
+        var changed = context
+        changed.additionalParameters.removeLast()
+        #expect(context != changed)
+        changed = context
+        changed.additionalParameters[0].0 = "other"
+        #expect(context != changed)
+        changed = context
+        changed.additionalParameters[0].1 = "other"
+        #expect(context != changed)
+        changed = context
+        changed.additionalParameters.reverse()
+        #expect(context != changed)
+        changed = context
+        changed.username = "other"
+        #expect(context != changed)
+        changed = context
+        changed.password = nil
+        #expect(context != changed)
+        changed = context
+        changed.database = nil
+        #expect(context != changed)
+    }
+
     @Test func testStartup() {
         let authContext = AuthContext(username: "test", password: "abc123", database: "test")
         var state = ConnectionStateMachine(requireBackendKeyData: true)
